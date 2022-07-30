@@ -1,3 +1,5 @@
+using Alexandria.Api.Configurations;
+using Alexandria.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +13,7 @@ builder.Services.AddSwaggerGen();
 
 #region Database Connection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
-//builder.Services.AddDbContext<AlexandriaDbContext>(options => options.UseSqlServer(connString));
+builder.Services.AddDbContext<AlexandriaDbContext>(options => options.UseSqlServer(connString));
 #endregion
 
 #region Logger - SeriLog
@@ -31,6 +33,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", b => b.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
 });
+#endregion
+
+#region Register Automapper
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 #endregion
 
 var app = builder.Build();
