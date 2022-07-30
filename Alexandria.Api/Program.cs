@@ -1,5 +1,6 @@
 using Alexandria.Api.Configurations;
 using Alexandria.Api.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,13 @@ builder.Services.AddSwaggerGen();
 #region Database Connection
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AlexandriaDbContext>(options => options.UseSqlServer(connString));
+#endregion
+
+#region Register Identity
+builder.Services
+    .AddIdentityCore<ApiUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AlexandriaDbContext>(); // Comment: User database can be separated from Applications database
 #endregion
 
 #region Logger - SeriLog

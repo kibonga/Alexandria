@@ -1,6 +1,7 @@
 ﻿using Alexandria.Api.Data;
 using Alexandria.Api.Models.Author;
 using Alexandria.Api.Models.Book;
+using Alexandria.Api.Models.User;
 using AutoMapper;
 
 namespace Alexandria.Api.Configurations
@@ -25,6 +26,10 @@ namespace Alexandria.Api.Configurations
                 .ReverseMap();
             CreateMap<BookUpdateDto, Book>().ReverseMap();
             CreateMap<BookCreateDto, Book>().ReverseMap();
+            #endregion
+
+            #region Api User
+            CreateMap<ApiUser, UserDto>().ReverseMap();
             #endregion
         }
     }

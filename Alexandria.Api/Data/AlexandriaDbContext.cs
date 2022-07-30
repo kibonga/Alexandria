@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Alexandria.Api.Data
 {
-    public partial class AlexandriaDbContext : DbContext
+    public partial class AlexandriaDbContext : IdentityDbContext<ApiUser> // Comment: Identity context is binded to ApiUser which inherits from default IdentityUser
     {
         public AlexandriaDbContext()
         {
@@ -32,6 +34,8 @@ namespace Alexandria.Api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder); // Comment: This is needed because we are now inheriting from IdentityDbContext and not DbContext (default)
+
             modelBuilder.Entity<Author>(entity =>
             {
                 entity.Property(e => e.Bio).HasMaxLength(250);
@@ -63,6 +67,67 @@ namespace Alexandria.Api.Data
                     .HasForeignKey(d => d.AuthorId)
                     .HasConstraintName("FK_Books_Authors");
             });
+
+            #region Seed Roles
+            // Comment: Seed Roles
+            modelBuilder.Entity<IdentityRole>().HasData(
+                    new IdentityRole
+                    {
+                        Name = "User",
+                        NormalizedName = "USER",
+                        Id = "e4225d87-3b1c-41bf-bfb6-34a2c238c6cb"
+                    },
+                    new IdentityRole
+                    {
+                        Name = "Administrator",
+                        NormalizedName = "ADMINISTRATOR",
+                        Id = "c868aebb-0d51-4c91-8f47-9533d6ceecdd"
+                    }
+                );
+            #endregion
+
+            #region Seed Users
+            // Comment: Seed Users
+            var passwordHasher = new PasswordHasher<ApiUser>(); // Comment: Api User Password Hasher
+            modelBuilder.Entity<ApiUser>().HasData(
+                    new ApiUser { 
+                        Id = "31b9ecdc-05e1-42b9-ae4a-965bc7d0aebf",
+                        Email = "admin@alexandria.com",
+                        NormalizedEmail = "ADMIN@ALEXANDRIA.COM",
+                        UserName = "admin@alexandria.com",
+                        NormalizedUserName = "ADMIN@ALEXANDRIA.COM",
+                        FirstName = "Kibonga",
+                        LastName = "Kimur",
+                        PasswordHash = passwordHasher.HashPassword(null, "!Kibonga01") 
+                    },
+                    new ApiUser { 
+                        Id = "3d7f652f-c44d-4d48-9231-0b4f8ea1e89a",
+                        Email = "user@alexandria.com",
+                        NormalizedEmail = "USER@ALEXANDRIA.COM",
+                        UserName = "user@alexandria.com",
+                        NormalizedUserName = "USER@ALEXANDRIA.COM",
+                        FirstName = "Suga",
+                        LastName = "Sean",
+                        PasswordHash = passwordHasher.HashPassword(null, "!Kibonga01")
+                    }
+                );
+            #endregion
+
+            #region Assign Users to Roles
+            // Comment: Assign users to roles
+            modelBuilder.Entity<IdentityUserRole<string>>().HasData(
+                new IdentityUserRole<string>
+                {
+                    RoleId = "c868aebb-0d51-4c91-8f47-9533d6ceecdd",
+                    UserId = "31b9ecdc-05e1-42b9-ae4a-965bc7d0aebf"
+                },
+                new IdentityUserRole<string>
+                {
+                    RoleId = "e4225d87-3b1c-41bf-bfb6-34a2c238c6cb",
+                    UserId = "3d7f652f-c44d-4d48-9231-0b4f8ea1e89a"
+                }
+            );
+            #endregion
 
             OnModelCreatingPartial(modelBuilder);
         }

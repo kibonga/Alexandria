@@ -19,8 +19,5 @@ namespace Alexandria.Api.Models.Book
         [Required]
         [Range(0, int.MaxValue)]
         public decimal Price { get; set; }
-        public int? AuthorId { get; set; }
-
-        public virtual Author? Author { get; set; }
     }
 }
