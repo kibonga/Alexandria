@@ -58,13 +58,13 @@ namespace Alexandria.Api.Controllers
             {
                 if (_context.Authors == null)
                 {
-                    _logger.LogWarning($"Record Not Found: {nameof(GetAuthor)} with Id: {id}");
                     return NotFound();
                 }
                 var author = _mapper.Map<AuthorReadOnlyDto>(await _context.Authors.FindAsync(id));
 
                 if (author == null)
                 {
+                    _logger.LogWarning($"Record Not Found: {nameof(GetAuthor)} with Id: {id}");
                     return NotFound();
                 }
 
