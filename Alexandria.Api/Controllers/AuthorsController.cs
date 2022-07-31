@@ -9,11 +9,13 @@ using Alexandria.Api.Data;
 using Alexandria.Api.Models.Author;
 using AutoMapper;
 using Alexandria.Api.Static;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Alexandria.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AuthorsController : ControllerBase
     {
         private readonly AlexandriaDbContext _context;
@@ -82,6 +84,7 @@ namespace Alexandria.Api.Controllers
         // PUT: api/Authors/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> PutAuthor(int id, AuthorUpdateDto authorDto)
         {
             if (id != authorDto.Id)
@@ -126,6 +129,7 @@ namespace Alexandria.Api.Controllers
         // POST: api/Authors
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrator")]
         public async Task<ActionResult<AuthorCreateDto>> PostAuthor(AuthorCreateDto authorDto)
         {
             if (_context.Authors == null)
@@ -143,6 +147,7 @@ namespace Alexandria.Api.Controllers
         #region Deletes single Author
         // DELETE: api/Authors/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteAuthor(int id)
         {
             try
