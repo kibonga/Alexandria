@@ -10,6 +10,7 @@ using Alexandria.Api.Models.Author;
 using AutoMapper;
 using Alexandria.Api.Static;
 using Microsoft.AspNetCore.Authorization;
+using AutoMapper.QueryableExtensions;
 
 namespace Alexandria.Api.Controllers
 {
@@ -54,7 +55,7 @@ namespace Alexandria.Api.Controllers
         #region Gets single Author
         // GET: api/Authors/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<AuthorReadOnlyDto>> GetAuthor(int id)
+        public async Task<ActionResult<AuthorDetailsDto>> GetAuthor(int id)
         {
             try
             {
@@ -62,7 +63,13 @@ namespace Alexandria.Api.Controllers
                 {
                     return NotFound();
                 }
-                var author = _mapper.Map<AuthorReadOnlyDto>(await _context.Authors.FindAsync(id));
+
+                var author = await _context.Authors
+                    .Include(x => x.Books)
+                    .ProjectTo<AuthorDetailsDto>(_mapper.ConfigurationProvider)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                //var authorDto = _mapper.Map<AuthorDetailsDto>(author);
 
                 if (author == null)
                 {

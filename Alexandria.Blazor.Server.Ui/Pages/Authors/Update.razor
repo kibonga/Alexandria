@@ -1,0 +1,67 @@
+﻿@page "/authors/update/{Id:int}"
+@inject NavigationManager _navigationManager
+@inject IAuthorService _authorService
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<h3>Update Author</h3>
+
+<EditForm Model="Author" OnValidSubmit="OnUpdateAuthor">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+        <label for="firstName">First Name</label>
+        <InputText @bind-Value="@Author.FirstName" class="form-control" id="firstName"/>
+        <ValidationMessage For="@(() => Author.FirstName)"/>
+    </div>
+    <div class="form-control">
+        <label for="lastName">Last Name</label>
+        <InputText @bind-Value="@Author.LastName" class="form-control" id="lastName"/>
+        <ValidationMessage For="@(() => Author.LastName)"/>
+    </div>
+    <div class="form-control">
+        <label for="bio">Biography</label>
+        <InputTextArea @bind-Value="Author.Bio" class="form-control" id="bio" />
+        <ValidationMessage For="@(() => Author.Bio)"/>
+    </div>
+    <button class="btn btn-primary" type="submit">
+        <span class="oi oi-pencil"></span>
+        Update
+    </button>
+    <a class="btn btn-outline-secondary" @onclick="BackToList">
+        <span class="oi oi-media-skip-backward"></span>
+        Back
+    </a>
+</EditForm>
+
+@code {
+    // Comment: Parameter that is being passed through URL {id:int}
+    [Parameter]
+    public int Id { get; set; }
+    AuthorUpdateDto Author = new AuthorUpdateDto();
+
+    protected async override  Task OnInitializedAsync()
+    {
+        var response = await _authorService.GetForUpdate(Id);
+
+        if(response.Success)
+        {
+           Author = response.Data;
+        }
+    }
+
+    private async Task OnUpdateAuthor()
+    {
+        var response = await _authorService.Edit(Id, Author);
+
+        if(response.Success)
+        {
+            BackToList();
+        }
+    }
+
+    private void BackToList()
+    {
+        _navigationManager.NavigateTo("/authors/");
+    }
+}

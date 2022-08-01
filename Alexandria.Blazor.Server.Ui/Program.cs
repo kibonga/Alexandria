@@ -1,3 +1,4 @@
+using Alexandria.Blazor.Server.Ui.Configurations;
 using Alexandria.Blazor.Server.Ui.Providers;
 using Alexandria.Blazor.Server.Ui.Services;
 using Alexandria.Blazor.Server.Ui.Services.Auth;
@@ -29,6 +30,10 @@ builder.Services.RegisterServicesExtension();
 
 #region Register Providers
 builder.Services.RegisterProvidersExtension();
+#endregion
+
+#region Register Automapper
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 #endregion
 
 //

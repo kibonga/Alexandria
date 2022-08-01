@@ -9,6 +9,7 @@ namespace Alexandria.Blazor.Server.Ui.Providers
             #region ApiAuthStateProvider
             services.AddScoped<ApiAuthStatePovider>();
             #endregion
+
             #region AuthStateProvider
             // Basically means, when someone asks for AuthenticationStateProvider we are going to provide our custom ApiAuthStateProvider (inherits)
             services.AddScoped<AuthenticationStateProvider>(p =>

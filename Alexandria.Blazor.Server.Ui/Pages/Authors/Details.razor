@@ -1,0 +1,74 @@
+﻿@page "/authors/details/{Id:int}"
+@inject IAuthorService _authorService
+@inject NavigationManager _navigationManager
+
+<h3>User Details</h3>
+
+<EditForm Model="Author">
+    <fieldset disabled="true">
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <InputText @bind-Value="@Author.FirstName" id="firstName"/>
+            <ValidationMessage For="@(() => Author.FirstName)"/>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <InputText @bind-Value="@Author.LastName" id="lastName"/>
+            <ValidationMessage For="@(() => Author.LastName)"/>
+        </div>
+        <div class="form-group">
+            <label for="bio">Biography</label>
+            <InputText @bind-Value="Author.Bio" id="bio"/>
+            <ValidationMessage For="@(() => Author.Bio)"/>
+        </div>
+    </fieldset>
+
+    @if(Author.Books == null || !Author.Books.Any())
+    {
+        <div class="alert alert-dismissible alert-secondary">
+            No Books for this Author
+        </div>
+    }
+    else
+    {
+        foreach(var book in Author.Books)
+        {
+            <div class="card" style="width: 18rem">
+                <img src="@book.Image" alt="@book.Title" class="card-img-top"/>
+                <div class="card-body">
+                    <h5 class="card-title">@book.Title</h5>
+                    <p class="card-text">@book.Price.ToString("C")</p>
+                    <a href="/books/details/@book.Id" class="btn btn-primary">View Book</a>
+                </div> 
+            </div>
+        }
+    }
+
+    <hr />
+    <button @onclick="GoToEditAuthor" class="btn btn-warning">
+        <span class="oi oi-pencil"></span>
+        Edit Author
+    </button>
+    <a class="btn btn-outline-secondary" href="/authors/">Back to Authors</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    AuthorDetailsDto Author = new AuthorDetailsDto();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var response = await _authorService.Get(Id);
+
+        if(response.Success)
+        {
+            Author = response.Data;
+        }
+    }
+
+    private void GoToEditAuthor()
+    {
+        _navigationManager.NavigateTo($"/authors/update/{Author.Id}");
+    }
+}

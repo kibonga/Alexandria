@@ -14,6 +14,7 @@ namespace Alexandria.Api.Configurations
             CreateMap<AuthorCreateDto, Author>().ReverseMap(); 
             CreateMap<AuthorUpdateDto, Author>().ReverseMap(); 
             CreateMap<AuthorReadOnlyDto, Author>().ReverseMap();
+            CreateMap<AuthorDetailsDto, Author>().ReverseMap();
             #endregion
 
             #region Book
