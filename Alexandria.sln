@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{4BFA22A3-506
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui", "ui", "{38AC8653-8708-4DDC-956F-0EA4F71ACFF4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alexandria.Blazor.Server.Ui", "..\Alexandria\Alexandria.Blazor.Server.Ui\Alexandria.Blazor.Server.Ui.csproj", "{D3F47610-87FF-4051-9058-A0E530F18F0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alexandria.Blazor.Server.Ui", "Alexandria.Blazor.Server.Ui\Alexandria.Blazor.Server.Ui.csproj", "{D3F47610-87FF-4051-9058-A0E530F18F0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

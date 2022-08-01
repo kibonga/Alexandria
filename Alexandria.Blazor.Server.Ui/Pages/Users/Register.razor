@@ -1,0 +1,72 @@
+﻿@page "/users/register"
+@inject IClient _httpClient
+@inject NavigationManager _navigationManager
+
+<h3>Register User</h3>
+
+@if(!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-danger">
+        <p>@message</p>
+    </div>
+}
+
+<div class="card-body">
+    <EditForm Model="RegistrationModel" OnValidSubmit="HandleRegistration">
+        <DataAnnotationsValidator/> @*Comment: Enforces Validation*@
+        <ValidationSummary/> @*Comment: Prints out Invalid fields*@
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.Email"></InputText>
+            <ValidationMessage For="@(() => RegistrationModel.Email)"/>
+        </div>
+        <div class="form-group">
+            <label for="firstName">First Name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.FirstName"/>
+            <ValidationMessage For="@(() => RegistrationModel.FirstName)"/>
+        </div>
+        <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.LastName"/>
+            <ValidationMessage For="@(() => RegistrationModel.LastName)"/>
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <InputText type="password" class="form-control" @bind-Value="RegistrationModel.Password"/>
+            <ValidationMessage For="@(() => RegistrationModel.Password)"/>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Register</button>
+    </EditForm>
+</div>
+
+@code {
+    UserDto RegistrationModel = new UserDto
+    {
+        Role = "User" // By default registration creates REGULAR USER
+    };
+    string message = string.Empty;
+
+    private async Task HandleRegistration()
+    {
+        try
+        {
+            await _httpClient.RegisterAsync(RegistrationModel);
+            NaviagteToLogin();
+        }
+        catch (ApiException ex)
+        {
+            if(ex.StatusCode >= 200 && ex.StatusCode <= 299)
+            {
+                NaviagteToLogin();
+            }
+            message = ex.Response;
+        }
+
+
+    }
+
+    private void NaviagteToLogin()
+    {
+        _navigationManager.NavigateTo("/users/login");
+    }
+}
