@@ -51,7 +51,7 @@ namespace Alexandria.Api.Controllers
         #region Gets single Book
         // GET: api/Books/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookReadOnlyDto>> GetBook(int id)
+        public async Task<ActionResult<BookDetailsDto>> GetBook(int id)
         {
             try
             {

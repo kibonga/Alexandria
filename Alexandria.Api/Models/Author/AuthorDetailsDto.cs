@@ -2,7 +2,7 @@
 
 namespace Alexandria.Api.Models.Author
 {
-    public class AuthorDetailsDto: AuthorReadOnlyDto
+    public class AuthorDetailsDto : AuthorReadOnlyDto
     {
         public List<BookReadOnlyDto> Books { get; set; }
     }
