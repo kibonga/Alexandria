@@ -1,13 +1,13 @@
-﻿@page "/books/create/"
+﻿@page "/books/update/{Id:int}"
 @inject IBookService _bookService
 @inject IAuthorService _authorService
 @inject NavigationManager _navigationManager
 
 @attribute [Authorize(Roles = Roles.Admin)]
 
-<h3>Create Book</h3>
+<h3>Update Book</h3>
 
-<EditForm Model="Book" OnValidSubmit="OnCreateBook">
+<EditForm Model="Book" OnValidSubmit="OnUpdateBook">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div class="form-group">
@@ -35,7 +35,7 @@
         <InputTextArea @bind-Value="Book.Summary" class="form-control" id="summary" />
         <ValidationMessage For="@(() => Book.Summary)" />
     </div>
-    <div class="form-group">
+@*    <div class="form-group">
         <label for="author">Author</label>
         <InputSelect @bind-Value="Book.AuthorId" class="form-select" id="author">
             <option value="">-- Select Author --</option>
@@ -45,7 +45,7 @@
             }
         </InputSelect>
         <ValidationMessage For="@(() => Book.AuthorId)"/>
-    </div>
+    </div>*@
     <div class="form-group">
         <label for="bookImage">Book Cover Image</label>
         <div>
@@ -65,7 +65,10 @@
 </EditForm>
 
 @code {
-    private BookCreateDto Book = new();
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookUpdateDto Book = new();
     private List<AuthorReadOnlyDto> Authors = new();
 
     private string img = string.Empty;
@@ -73,18 +76,24 @@
     private readonly long maxFileSize = 1024 * 1024 * 5;
     private readonly string[] availableExtension = { ".jpg", ".png", ".jpeg"};
 
-    protected override async Task OnInitializedAsync()
+    protected async override Task OnInitializedAsync()
     {
-        var response = await _authorService.Get();
-        if(response.Success)
+        var bookResponse = await _bookService.GetForUpdate(Id);
+        if(bookResponse.Success)
         {
-            Authors = response.Data; 
+            Book = bookResponse.Data;
+        }
+
+        var authorsResponse = await _authorService.Get();
+        if(authorsResponse.Success)
+        {
+            Authors = authorsResponse.Data;
         }
     }
 
-    private async Task OnCreateBook()
+    private async Task OnUpdateBook()
     {
-        var response = await _bookService.Create(Book);
+        var response = await _bookService.Edit(Id, Book);
         if(response.Success)
         {
             BackToList();
@@ -107,6 +116,7 @@
                 UploadFileWarning = "Please select a valid image file (*.jpg | *.png)";
                 return;
             }
+
             var imageByteArray = new byte[file.Size];
             await file.OpenReadStream().ReadAsync(imageByteArray);
             string imageType = file.ContentType;
@@ -115,7 +125,7 @@
             Book.ImageBase64String = base64String;
             Book.OriginalImageName = file.Name;
             img = $"data:{imageType}; base64: {base64String}";
-        }
+        } 
     }
 
     private void BackToList()

@@ -128,6 +128,22 @@ namespace Alexandria.Api.Controllers
             _mapper.Map(bookDto, book);
             #endregion
 
+            #region Create Image if present
+            if (!string.IsNullOrEmpty(bookDto.ImageBase64String))
+            {
+                book.Image = CreateFile(bookDto.ImageBase64String, bookDto.OriginalImageName);
+
+                #region Remove Previous Image
+                var picName = Path.GetFileName(book.Image);
+                var path = $"{_webHostEnvironment.WebRootPath}\\bookcoverimages\\{picName}";
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+                #endregion
+            }
+            #endregion
+
             #region Set Entity State to Modified
             _context.Entry(book).State = EntityState.Modified; 
             #endregion
