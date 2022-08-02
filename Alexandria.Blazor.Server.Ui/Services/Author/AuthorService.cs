@@ -176,7 +176,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
                 #endregion
 
                 #region Delete Author via Api Endpoint using HttpClient
-
+                await _client.AuthorsDELETEAsync(id);
                 #endregion
             }
             catch (ApiException ex)
