@@ -11,6 +11,11 @@ namespace Alexandria.Blazor.Server.Ui.Configurations
             CreateMap<AuthorReadOnlyDto, AuthorUpdateDto>().ReverseMap();
             CreateMap<AuthorDetailsDto, AuthorUpdateDto>().ReverseMap();
             #endregion
+
+            #region Book
+            CreateMap<BookReadOnlyDto, BookUpdateDto>().ReverseMap();
+            CreateMap<BookDetailsDto, BookUpdateDto>().ReverseMap();
+            #endregion
         }
     }
 }

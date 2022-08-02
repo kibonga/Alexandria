@@ -1,5 +1,6 @@
 ﻿using Alexandria.Blazor.Server.Ui.Services.Auth;
 using Alexandria.Blazor.Server.Ui.Services.Author;
+using Alexandria.Blazor.Server.Ui.Services.Book;
 
 namespace Alexandria.Blazor.Server.Ui.Services
 {
@@ -13,6 +14,10 @@ namespace Alexandria.Blazor.Server.Ui.Services
 
             #region Register Author services
             services.AddScoped<IAuthorService, AuthorService>();
+            #endregion
+
+            #region Register Book services
+            services.AddScoped<IBookService, BookService>();
             #endregion
         }
     }
