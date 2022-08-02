@@ -1,0 +1,96 @@
+﻿@page "/books/create/"
+@inject IBookService _bookService
+@inject IAuthorService _authorService
+@inject NavigationManager _navigationManager
+
+@attribute [Authorize(Roles = Roles.Admin)]
+
+<h3>Create Book</h3>
+
+<EditForm Model="Book" OnValidSubmit="OnCreateBook">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText @bind-Value="Book.Title" class="form-control" id="title"/>
+        <ValidationMessage For="@(() => Book.Title)"/>
+    </div>
+    <div class="form-group">
+        <label for="isbn">ISBN</label>
+        <InputText @bind-Value="Book.Isbn" class="form-control" id="isbn"/>
+        <ValidationMessage For="@(() => Book.Isbn)"/>
+    </div>
+    <div class="form-group">
+        <label for="price">Price</label>
+        <InputNumber @bind-Value="Book.Price" class="form-control" id="price"/>
+        <ValidationMessage For="@(() => Book.Price)"/>
+    </div>
+    <div class="form-group">
+        <label for="year">Year</label>
+        <InputNumber @bind-Value="Book.Year" class="form-control" id="year"/>
+        <ValidationMessage For="@(() => Book.Year)" />
+    </div>
+@*    <div class="form-group">
+        <label for="author">Author</label>
+        <InputSelect @bind-Value="Book.Id" class="form-select" id="author">
+            <option value="">-- Select Author --</option>
+            @foreach(var author in Authors)
+            {
+                <option value="@author.Id">@author.FirstName @author.LastName</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => Book.Id)"/>
+    </div>
+    <div class="form-group">
+        <label for="bookImage">Book Cover Image</label>
+        <div>
+            <InputFile OnChange="OnFileSelect"/>
+            <img src="@img" width="100" height="100" class="img-thumbnail"/>
+            <p class="text-danger">@UploadFileWarning</p>
+        </div>
+    </div>*@
+    <button class="btn btn-primary" type="submit">
+        <span class="oi oi-pencil"></span>
+        Create
+    </button>
+    <button @onclick="BackToList" class="btn btn-outline-secondary" type="button">
+        <span class="oi oi-media-skip-backward"></span>
+        Back To List 
+    </button>
+</EditForm>
+
+@code {
+    private BookCreateDto Book = new();
+    private List<AuthorReadOnlyDto> Authors = new();
+    private string img = string.Empty;
+    private readonly long maxFileSize = 1024 * 1024 * 5;
+    private string UploadFileWarning = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await _authorService.Get();
+        if(response.Success)
+        {
+            Authors = response.Data; 
+        }
+    }
+
+    private async Task OnCreateBook()
+    {
+        var response = await _bookService.Create(Book);
+        if(response.Success)
+        {
+            BackToList();
+        }
+    }
+
+    private async Task OnFileSelect(InputFileChangeEventArgs e)
+    {
+        
+    }
+
+    private void BackToList()
+    {
+        _navigationManager.NavigateTo("/books/");
+    }
+}

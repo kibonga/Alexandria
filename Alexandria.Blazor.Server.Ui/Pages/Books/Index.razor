@@ -1,0 +1,99 @@
+﻿@page "/books/"
+@inject IJSRuntime _js
+@inject IBookService _bookService
+
+
+<h3>Book List</h3>
+
+@if(!response.Success)
+{
+    <div class="alert alert-danger">
+        <h4>@response.Message</h4>
+    </div>
+}
+else
+{
+    @if(Books == null)
+    {
+        <div class="alert alert-info">
+            <h4>Loading Data...</h4>
+        </div>
+    }
+    else
+    {
+        <AuthorizeView Roles="@Roles.Admin">
+            <a href="/books/create" class="btn btn-primary">
+                <span class="oi oi-plus" aria-hidden="true"></span> 
+                Create
+            </a>
+        </AuthorizeView>
+        <table class="table table-response">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Author Name</th>
+                    <th>Actoins</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var book in Books)
+                {
+                    <tr>
+                        <td>
+                            <img src="@book.Image" width="100" height="100" alt="@book.Title" class="img-fluid"/>
+                        </td>
+                        <td>@book.Title</td>
+                        <td>@book.Price</td>
+                        <td>@book.AuthorName</td>
+                        <td>
+                            <a href="/books/details/@book.Id" class="btn btn-primary">
+                                <span class="oi oi-book" aria-hidden="true"></span> 
+                                Details
+                            </a>
+                            <AuthorizeView Roles="@Roles.Admin">
+                                <a href="/books/update/@book.Id" class="btn btn-warning">
+                                    <span class="oi oi-pencil" aria-hidden="true"></span> 
+                                    Edit
+                                </a>
+                                <button type="submit" class="btn btn-danger" @onclick="@(() => Delete(@book.Id))">
+                                    <span class="oi oi-delete" aria-hidden="true"></span> Delete
+                                </button>
+                            </AuthorizeView>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+}
+
+@code {
+    private List<BookReadOnlyDto> Books;
+    private Response<List<BookReadOnlyDto>> response = new Response<List<BookReadOnlyDto>> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await _bookService.Get();
+        if(response.Success)
+        {
+            Books = response.Data;
+        }
+    }
+
+    private async Task Delete(int bookId)
+    {
+        var book = Books.FirstOrDefault(x => x.Id == bookId);
+        var confirm = await _js.InvokeAsync<bool>($"confirm", $"You are about to Delte {book.Title}");
+        if(confirm)
+        {
+            var response = await _bookService.Delete(bookId);
+            if(response.Success)
+            {
+                await OnInitializedAsync();
+            }
+        }
+    }
+}

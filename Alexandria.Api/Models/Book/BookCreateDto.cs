@@ -5,6 +5,8 @@ namespace Alexandria.Api.Models.Book
     public class BookCreateDto
     {
         [Required]
+        public int AuthorId { get; set; }
+        [Required]
         [StringLength(50)]
         public string Title { get; set; } = null!;
         [Required]
