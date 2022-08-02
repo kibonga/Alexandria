@@ -50,7 +50,7 @@ namespace Alexandria.Api.Data
                 entity.HasIndex(e => e.Isbn, "UQ__Books__447D36EA2CB7BA9D")
                     .IsUnique();
 
-                entity.Property(e => e.Image).HasMaxLength(100);
+                entity.Property(e => e.Image).HasMaxLength(250);
 
                 entity.Property(e => e.Isbn)
                     .HasMaxLength(50)

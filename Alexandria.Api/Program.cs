@@ -91,6 +91,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+#region Use Static Files (wwwroot)
+app.UseStaticFiles();
+#endregion
+
 #region Use Services
 //
 #region Use Cors with Policy
