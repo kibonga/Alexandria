@@ -124,10 +124,6 @@ namespace Alexandria.Api.Controllers
             }
             #endregion
 
-            #region Map BookUpdateDto to Book
-            _mapper.Map(bookDto, book);
-            #endregion
-
             #region Create Image if present
             if (!string.IsNullOrEmpty(bookDto.ImageBase64String))
             {
@@ -142,6 +138,10 @@ namespace Alexandria.Api.Controllers
                 }
                 #endregion
             }
+            #endregion
+
+            #region Map BookUpdateDto to Book
+            _mapper.Map(bookDto, book);
             #endregion
 
             #region Set Entity State to Modified

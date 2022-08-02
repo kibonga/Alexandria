@@ -35,7 +35,7 @@
         <InputTextArea @bind-Value="Book.Summary" class="form-control" id="summary" />
         <ValidationMessage For="@(() => Book.Summary)" />
     </div>
-@*    <div class="form-group">
+    <div class="form-group">
         <label for="author">Author</label>
         <InputSelect @bind-Value="Book.AuthorId" class="form-select" id="author">
             <option value="">-- Select Author --</option>
@@ -45,7 +45,7 @@
             }
         </InputSelect>
         <ValidationMessage For="@(() => Book.AuthorId)"/>
-    </div>*@
+    </div>
     <div class="form-group">
         <label for="bookImage">Book Cover Image</label>
         <div>
@@ -56,7 +56,7 @@
     </div>
     <button class="btn btn-primary" type="submit">
         <span class="oi oi-pencil"></span>
-        Create
+        Update
     </button>
     <button @onclick="BackToList" class="btn btn-outline-secondary" type="button">
         <span class="oi oi-media-skip-backward"></span>
@@ -82,6 +82,7 @@
         if(bookResponse.Success)
         {
             Book = bookResponse.Data;
+            img = Book.Image;
         }
 
         var authorsResponse = await _authorService.Get();
@@ -124,7 +125,7 @@
 
             Book.ImageBase64String = base64String;
             Book.OriginalImageName = file.Name;
-            img = $"data:{imageType}; base64: {base64String}";
+            img = $"data:{imageType}; base64, {base64String}";
         } 
     }
 

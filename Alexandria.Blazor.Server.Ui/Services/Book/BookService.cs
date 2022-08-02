@@ -162,7 +162,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Book
                 #endregion
 
                 #region Get single Book for Update via Api Endpoint using HttpClient
-                var data = _client.BooksGETAsync(id);
+                var data = await _client.BooksGETAsync(id);
                 #endregion
 
                 #region Create Response Object
