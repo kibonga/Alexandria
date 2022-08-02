@@ -17,7 +17,6 @@ namespace Alexandria.Api.Models.Book
         [Required]
         [StringLength(250, MinimumLength = 10)]
         public string? Summary { get; set; }
-        [StringLength(250)]
         public string? ImageBase64String { get; set; }
         public string? OriginalImageName { get; set; }
         [Required]

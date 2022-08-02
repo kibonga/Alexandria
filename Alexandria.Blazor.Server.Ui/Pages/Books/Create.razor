@@ -31,6 +31,11 @@
         <ValidationMessage For="@(() => Book.Year)" />
     </div>
     <div class="form-group">
+        <label for="summary">Summary</label>
+        <InputTextArea @bind-Value="Book.Summary" class="form-control" id="summary" />
+        <ValidationMessage For="@(() => Book.Summary)" />
+    </div>
+    <div class="form-group">
         <label for="author">Author</label>
         <InputSelect @bind-Value="Book.AuthorId" class="form-select" id="author">
             <option value="">-- Select Author --</option>
@@ -65,6 +70,7 @@
     private string img = string.Empty;
     private readonly long maxFileSize = 1024 * 1024 * 5;
     private string UploadFileWarning = string.Empty;
+    private readonly string[] availableExtension = { ".jpg", ".png", ".jpeg"};
 
     protected override async Task OnInitializedAsync()
     {
@@ -86,7 +92,29 @@
 
     private async Task OnFileUpload(InputFileChangeEventArgs e)
     {
-        
+        var file = e.File;
+        if(file != null)
+        {
+            if(file.Size > maxFileSize)
+            {
+                UploadFileWarning = "Uploaded image is to larger";
+                return;
+            }
+            var ext = Path.GetExtension(file.Name);
+            if(!availableExtension.Contains(ext))
+            {
+                UploadFileWarning = "Please select a valid image file (*.jpg | *.png)";
+                return;
+            }
+            var imageByteArray = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(imageByteArray);
+            string imageType = file.ContentType;
+            string base64String = Convert.ToBase64String(imageByteArray);
+
+            Book.ImageBase64String = base64String;
+            Book.OriginalImageName = file.Name;
+            img = $"data:{imageType}; base64: {base64String}";
+        }
     }
 
     private void BackToList()
