@@ -1,9 +1,11 @@
-﻿using Alexandria.Blazor.Server.Ui.Services.Base;
+﻿using Alexandria.Blazor.Server.Ui.Models;
+using Alexandria.Blazor.Server.Ui.Services.Base;
 
 namespace Alexandria.Blazor.Server.Ui.Services.Author
 {
     public interface IAuthorService
     {
+        public Task<Response<AuthorReadOnlyDtoVirtualizedResponse>> Get(QueryParameters queryParams);
         public Task<Response<List<AuthorReadOnlyDto>>> Get();
         public Task<Response<AuthorDetailsDto>> Get(int id);
         public Task<Response<AuthorUpdateDto>> GetForUpdate(int id);

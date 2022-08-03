@@ -1,5 +1,6 @@
 using Alexandria.Api.Configurations;
 using Alexandria.Api.Data;
+using Alexandria.Api.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,10 @@ builder.Services.AddAuthentication(options =>
 
 #region Register Automapper
 builder.Services.AddAutoMapper(typeof(MapperConfig));
+#endregion
+
+#region Register Repositories
+builder.Services.RegisterRepositories();
 #endregion
 //
 #endregion

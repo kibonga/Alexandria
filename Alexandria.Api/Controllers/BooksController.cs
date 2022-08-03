@@ -13,6 +13,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using System.Text;
+using Alexandria.Api.Repositories.Books;
 
 namespace Alexandria.Api.Controllers
 {
@@ -21,19 +22,19 @@ namespace Alexandria.Api.Controllers
     [Authorize]
     public class BooksController : ControllerBase
     {
-        private readonly AlexandriaDbContext _context;
+        private readonly IBookRepository _bookRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<BooksController> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public BooksController(
-            AlexandriaDbContext context, 
+            IBookRepository bookRepository, 
             IMapper mapper, 
             ILogger<BooksController> logger,
             IWebHostEnvironment webHostEnvironment
         )
         {
-            _context = context;
+            _bookRepository = bookRepository;
             _mapper = mapper;
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
@@ -44,20 +45,8 @@ namespace Alexandria.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookReadOnlyDto>>> GetBooks()
         {
-            if (_context.Books == null)
-            {
-                return NotFound();
-            }
 
-            #region Get List of Books and map them to BookReadOnlyDto using AutoMapper Projection
-            var bookDtos = await _context.Books
-                    .Include(x => x.Author)
-                    .ProjectTo<BookReadOnlyDto>(_mapper.ConfigurationProvider) // Comment: shorter and more explicit way of calling automapper, get only specified properties from database (not all)
-                    .ToListAsync();
-            //var bookDtos = _mapper.Map<IEnumerable<BookReadOnlyDto>>(books); // Legacy: longer way of automapping 
-            #endregion
-
-            return Ok(bookDtos);
+            return Ok(await _bookRepository.GetAllBooksAsync());
         }
         #endregion
 
@@ -68,18 +57,7 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Books == null)
-                {
-                    return NotFound();
-                }
-
-                #region Get single Book and map it to BookDetailsDto using AutoMapper Projection
-                //var book = _mapper.Map<BookReadOnlyDto>(await _context.Books.FindAsync(id));
-                var book = await _context.Books
-                    .Include(x => x.Author)
-                    .ProjectTo<BookDetailsDto>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(x => x.Id == id);
-                #endregion
+                var book = await _bookRepository.GetBookAsync(id);
 
                 #region Check if Book is present
                 if (book == null)
@@ -110,11 +88,11 @@ namespace Alexandria.Api.Controllers
             if (id != bookDto.Id)
             {
                 return BadRequest();
-            } 
+            }
             #endregion
 
             #region Get Book
-            var book = await _context.Books.FindAsync(id);
+            var book = await _bookRepository.GetAsync(id);
             #endregion
 
             #region Check if Book exists
@@ -144,13 +122,9 @@ namespace Alexandria.Api.Controllers
             _mapper.Map(bookDto, book);
             #endregion
 
-            #region Set Entity State to Modified
-            _context.Entry(book).State = EntityState.Modified; 
-            #endregion
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _bookRepository.UpdateAsync(book);
             }
             #region Large Catch Block (auto generated)
             catch (DbUpdateConcurrencyException ex)
@@ -180,10 +154,6 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Books == null)
-                {
-                    return Problem("Entity set 'AlexandriaDbContext.Books'  is null.");
-                }
 
                 #region Map BookCreateDto to Book
                 var book = _mapper.Map<Book>(bookDto);
@@ -197,11 +167,10 @@ namespace Alexandria.Api.Controllers
                 #endregion
 
                 #region Add Book
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync(); 
+                await _bookRepository.AddAsync(book);
                 #endregion
 
-                return CreatedAtAction("GetBook", new { id = book.Id }, book);
+                return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
             }
             #region Catch block
             catch (Exception ex)
@@ -221,13 +190,9 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Books == null)
-                {
-                    return NotFound();
-                }
 
                 #region Get Book
-                var book = await _context.Books.FindAsync(id);
+                var book = await _bookRepository.GetAsync(id);
                 #endregion
 
                 #region Check if Book exists
@@ -238,8 +203,7 @@ namespace Alexandria.Api.Controllers
                 #endregion
 
                 #region Remove Book
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync(); 
+                await _bookRepository.DeleteAsync(id); 
                 #endregion
 
                 return NoContent();
@@ -257,7 +221,7 @@ namespace Alexandria.Api.Controllers
         #region Checks if Book Exists
         private async Task<bool> BookExistsAsync(int id)
         {
-            return await _context.Books.AnyAsync(e => e.Id == id);
+            return await _bookRepository.Exists(id);
         }
         #endregion
 

@@ -18,7 +18,7 @@ namespace Alexandria.Api.Configurations
             #endregion
 
             #region Book
-            // Comment: Advanced mapping
+            //Comment: Advanced mapping
             CreateMap<Book, BookReadOnlyDto>()
                 .ForMember(bookDto => bookDto.AuthorName, book => book.MapFrom(b => $"{b.Author.FirstName} {b.Author.LastName}"))
                 .ReverseMap();

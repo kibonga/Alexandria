@@ -1,6 +1,7 @@
 ﻿
 
 
+using Alexandria.Blazor.Server.Ui.Models;
 using Alexandria.Blazor.Server.Ui.Services.Base;
 using AutoMapper;
 using Blazored.LocalStorage;
@@ -12,7 +13,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
         private readonly IClient _client;
         private readonly IMapper _mapper;
 
-        public AuthorService(IClient client, ILocalStorageService localStorage, IMapper mapper) 
+        public AuthorService(IClient client, ILocalStorageService localStorage, IMapper mapper)
             : base(client, localStorage)
         {
             _client = client;
@@ -34,7 +35,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
                 await _client.AuthorsPOSTAsync(author);
                 #endregion
             }
-            catch(ApiException ex)
+            catch (ApiException ex)
             {
                 response = GlobalApiExceptions<int>(ex);
             }
@@ -44,9 +45,9 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
         #endregion
 
         #region Get All Authors
-        public async Task<Response<List<AuthorReadOnlyDto>>> Get()
+        public async Task<Response<AuthorReadOnlyDtoVirtualizedResponse>> Get(QueryParameters queryParams)
         {
-            Response<List<AuthorReadOnlyDto>> response;
+            Response<AuthorReadOnlyDtoVirtualizedResponse> response;
 
             try
             {
@@ -55,21 +56,21 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
                 #endregion
 
                 #region Get All Authors via Api Endpoint using HttpClient
-                var data = await _client.AuthorsAllAsync();
+                var data = await _client.AuthorsGETAsync(queryParams.StartIndex, queryParams.PerPage);
                 #endregion
 
                 #region Create Response Object
-                response = new Response<List<AuthorReadOnlyDto>>
+                response = new Response<AuthorReadOnlyDtoVirtualizedResponse>
                 {
-                    Data = data.ToList(),
+                    Data = data,
                     Success = true
-                }; 
+                };
                 #endregion
 
             }
-            catch(ApiException ex)
+            catch (ApiException ex)
             {
-                response = GlobalApiExceptions<List<AuthorReadOnlyDto>>(ex);
+                response = GlobalApiExceptions<AuthorReadOnlyDtoVirtualizedResponse>(ex);
             }
 
             return response;
@@ -112,7 +113,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
                 #endregion
 
                 #region Get single Author for UPDATE via Api Endpoint using HttpClient
-                var data = await _client.AuthorsGETAsync(id);
+                var data = await _client.AuthorsGET2Async(id);
                 #endregion
 
                 #region Map Author to AuthorUpdateDto using Automapper
@@ -144,7 +145,7 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
                 #endregion
 
                 #region Get single Author via Api Endpoint using HttpClient
-                var data = await _client.AuthorsGETAsync(id);
+                var data = await _client.AuthorsGET2Async(id);
                 #endregion
 
                 #region Map Authors to AuthorDetailsDto using Automapper
@@ -182,6 +183,30 @@ namespace Alexandria.Blazor.Server.Ui.Services.Author
             catch (ApiException ex)
             {
                 response = GlobalApiExceptions<int>(ex);
+            }
+
+            return response;
+        }
+        #endregion
+
+        #region Get all Authors as List<AuthorDetailsDto>
+        public async Task<Response<List<AuthorReadOnlyDto>>> Get()
+        {
+            Response<List<AuthorReadOnlyDto>> response;
+
+            try
+            {
+                await AddBearerToken();
+                var data = await _client.GetAllAsync();
+                response = new Response<List<AuthorReadOnlyDto>>
+                {
+                    Data = data.ToList(),
+                    Success = true
+                };
+            }
+            catch (ApiException exception)
+            {
+                response = GlobalApiExceptions<List<AuthorReadOnlyDto>>(exception);
             }
 
             return response;

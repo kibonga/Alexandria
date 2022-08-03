@@ -11,6 +11,8 @@ using AutoMapper;
 using Alexandria.Api.Static;
 using Microsoft.AspNetCore.Authorization;
 using AutoMapper.QueryableExtensions;
+using Alexandria.Api.Repositories.Authors;
+using Alexandria.Api.Models.Response;
 
 namespace Alexandria.Api.Controllers
 {
@@ -19,34 +21,26 @@ namespace Alexandria.Api.Controllers
     [Authorize]
     public class AuthorsController : ControllerBase
     {
-        private readonly AlexandriaDbContext _context;
+        //private readonly AlexandriaDbContext _context;
+        private readonly IAuthorRepository _authorRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<AuthorsController> _logger;
 
-        public AuthorsController(AlexandriaDbContext context, IMapper mapper, ILogger<AuthorsController> logger)
+        public AuthorsController(IAuthorRepository authorRepository, IMapper mapper, ILogger<AuthorsController> logger)
         {
-            _context = context;
+            _authorRepository = authorRepository;
             _mapper = mapper;
             _logger = logger;
         }
 
-        #region Get all Authors
+        #region Get all Authors - Virtualized
         // GET: api/Authors
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AuthorReadOnlyDto>>> GetAuthors()
+        public async Task<ActionResult<VirtualizedResponse<AuthorReadOnlyDto>>> GetAuthors([FromQuery] QueryParameters queryParameters)
         {
             try
             {
-                if (_context.Authors == null)
-                {
-                    return NotFound();
-                }
-
-                #region Map List of Authors to AuthorReadOnlyDto using AutoMapper
-                var authorsDtos = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(await _context.Authors.ToListAsync()); 
-                #endregion
-
-                return Ok(authorsDtos);
+                return await _authorRepository.GetAllAsync<AuthorReadOnlyDto>(queryParameters);
             }
             #region Catch Block
             catch (Exception ex)
@@ -58,6 +52,25 @@ namespace Alexandria.Api.Controllers
         }
         #endregion
 
+        #region Get all Authors 
+        // GET: api/Authors/GetAll
+        [HttpGet("GetAll")]
+        public async Task<ActionResult<List<AuthorReadOnlyDto>>> GetAuthors()
+        {
+            try
+            {
+                var authors = await _authorRepository.GetAllAsync();
+                var authorDtos = _mapper.Map<IEnumerable<AuthorReadOnlyDto>>(authors);
+                return Ok(authorDtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error Performing GET in {nameof(GetAuthors)}");
+                return StatusCode(500, Messages.Error500Message);
+            }
+        }
+        #endregion
+
         #region Get Author
         // GET: api/Authors/5
         [HttpGet("{id}")]
@@ -65,18 +78,7 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Authors == null)
-                {
-                    return NotFound();
-                }
-
-                #region Get single Author and map it to AuthorDetailsDto using AutoMapper Projection
-                var author = await _context.Authors
-                            .Include(x => x.Books)
-                            .ProjectTo<AuthorDetailsDto>(_mapper.ConfigurationProvider)
-                            .FirstOrDefaultAsync(x => x.Id == id);
-                //var authorDto = _mapper.Map<AuthorDetailsDto>(author); 
-                #endregion
+                var author = await _authorRepository.GetAsync(id);
 
                 #region Check if Author exists
                 if (author == null)
@@ -114,7 +116,7 @@ namespace Alexandria.Api.Controllers
             #endregion
 
             #region Get Author
-            var author = await _context.Authors.FindAsync(id);
+            var author = await _authorRepository.GetAsync(id);
             #endregion
 
             #region Check if Author exists
@@ -129,13 +131,9 @@ namespace Alexandria.Api.Controllers
             _mapper.Map(authorDto, author);
             #endregion
 
-            #region Change Entity State to Modified
-            _context.Entry(author).State = EntityState.Modified; 
-            #endregion
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _authorRepository.UpdateAsync(author);
             }
             #region Large Catch Block (auto generated)
             catch (DbUpdateConcurrencyException ex)
@@ -165,18 +163,13 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Authors == null)
-                {
-                    return Problem("Entity set 'AlexandriaDbContext.Authors'  is null.");
-                }
 
                 #region Map AuthorCreateDto to Author
                 var author = _mapper.Map<Author>(authorDto);
                 #endregion
 
                 #region Add Author
-                await _context.Authors.AddAsync(author);
-                await _context.SaveChangesAsync();
+                await _authorRepository.UpdateAsync(author);
                 #endregion
 
                 return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
@@ -199,13 +192,9 @@ namespace Alexandria.Api.Controllers
         {
             try
             {
-                if (_context.Authors == null)
-                {
-                    return NotFound();
-                }
 
                 #region Get Author
-                var author = await _context.Authors.FindAsync(id);
+                var author = await _authorRepository.GetAsync(id);
                 #endregion
 
                 #region Check if Author exists
@@ -217,8 +206,7 @@ namespace Alexandria.Api.Controllers
                 #endregion
 
                 #region Remove Author
-                _context.Authors.Remove(author);
-                await _context.SaveChangesAsync(); 
+                await _authorRepository.DeleteAsync(id);
                 #endregion
 
                 return NoContent();
@@ -236,7 +224,7 @@ namespace Alexandria.Api.Controllers
         #region Checks if Author Exists
         private async Task<bool> AuthorExists(int id)
         {
-            return await _context.Authors.AnyAsync(e => e.Id == id);
+            return await _authorRepository.Exists(id);
         } 
         #endregion
     }
