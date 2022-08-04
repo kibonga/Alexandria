@@ -30,7 +30,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-<p>It is a CMS for a BookStore.</p>
+<p>It is a simple CMS for a BookStore.</p>
 <p>Alexandria is a Blazor project created using ASP.NET Core 6, Entity Framework, Microsoft SQL Server.<p/>
 <p>It implements Repository pattern.</p>
 <p>This project follows REST standards and uses Swagger and NSwag for API Integration</p>
